@@ -1,0 +1,77 @@
+{"properties": [
+  {
+    "name": "management.metrics.distribution.sla.http.server.requests",
+    "type": "java.lang.String",
+    "description": "A description for 'management.metrics.distribution.sla.http.server.requests'"
+  },
+  {
+    "name": "jwt.secret",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.secret'"
+  },
+  {
+    "name": "jwt.access-token.expiration",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.access-token.expiration'"
+  },
+  {
+    "name": "jwt.refresh-token.expiration",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.refresh-token.expiration'"
+  },
+  {
+    "name": "spring.web.cors.allowed-origins",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.web.cors.allowed-origins'"
+  },
+  {
+    "name": "spring.web.cors.allowed-methods",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.web.cors.allowed-methods'"
+  },
+  {
+    "name": "spring.web.cors.allowed-headers",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.web.cors.allowed-headers'"
+  },
+  {
+    "name": "spring.web.cors.allow-credentials",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.web.cors.allow-credentials'"
+  },
+  {
+    "name": "spring.web.cors.max-age",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.web.cors.max-age'"
+  },
+  {
+    "name": "spring.security.headers.cache-control",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.security.headers.cache-control'"
+  },
+  {
+    "name": "spring.security.headers.content-security-policy",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.security.headers.content-security-policy'"
+  },
+  {
+    "name": "spring.security.headers.frame-options",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.security.headers.frame-options'"
+  },
+  {
+    "name": "spring.security.headers.xss-protection",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.security.headers.xss-protection'"
+  },
+  {
+    "name": "spring.security.headers.referrer-policy",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.security.headers.referrer-policy'"
+  },
+  {
+    "name": "spring.security.headers.content-type-options",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.security.headers.content-type-options'"
+  }
+]}

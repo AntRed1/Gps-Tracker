@@ -1,0 +1,103 @@
+📍 GPS Tracker System
+Un sistema GPS moderno que permite rastrear vehículos en tiempo real utilizando hardware embebido (ESP32 + SIM800L + GPS), y una arquitectura backend robusta con notificaciones vía WebSocket, autenticación JWT y almacenamiento en base de datos. Incluye una app móvil Flutter para consulta de eventos, alertas y ubicaciones.
+
+🗂 Estructura del Proyecto
+src/main/java/com/arojas/gpstracker/
+│
+├── config/
+│   └── WebSocketConfig.java
+│
+├── controllers/
+│   ├── AlertController.java
+│   ├── AuthController.java
+│   ├── DeviceController.java
+│   ├── GpsEventController.java
+│   ├── GpsLocationController.java
+│   └── UserController.java
+│
+├── dto/
+│   ├── AlertDTO.java
+│   ├── AlertRequest.java
+│   ├── AlertResponse.java
+│   ├── AuthResponse.java
+│   ├── DeviceRegisterRequest.java
+│   ├── DeviceResponse.java
+│   ├── GpsEventDTO.java
+│   ├── GpsLocationDTO.java
+│   ├── LoginRequest.java
+│   ├── LogoutRequest.java
+│   ├── PasswordChangeRequest.java
+│   ├── RefreshTokenRequest.java
+│   ├── RegisterRequest.java
+│   ├── TokenResponse.java
+│   ├── UserResponse.java
+│   └── UserUpdateRequest.java
+│
+├── entities/
+│   ├── Alert.java
+│   ├── Device.java
+│   ├── GpsEvent.java
+│   ├── GpsLocation.java
+│   └── User.java
+│
+├── exception/
+│   ├── BadRequestException.java
+│   ├── GlobalExceptionHandler.java
+│   ├── InvalidCredentialsException.java
+│   ├── NotFoundException.java
+│   ├── UnauthorizedException.java
+│   └── UserNotFoundException.java
+│
+├── mappers/
+│   └── AlertMapper.java
+│
+├── repositories/
+│   ├── AlertRepository.java
+│   ├── DeviceRepository.java
+│   ├── GpsEventRepository.java
+│   ├── GpsLocationRepository.java
+│   └── UserRepository.java
+│
+├── security/
+│   ├── JwtFilter.java
+│   ├── JwtUtil.java
+│   └── SecurityConfig.java
+│
+└── services/
+    ├── AlertService.java
+    ├── AuthService.java
+    ├── CustomUserDetailsService.java
+    ├── DeviceService.java
+    ├── GpsEventService.java
+    ├── GpsLocationService.java
+    ├── RedisService.java
+    └── UserService.java
+
+🧠 Arquitectura del Sistema
++-------------------+          GSM/GPRS        +---------------------+
+|  Vehículo con GPS | -----------------------> |     Backend/API     |
+| (ESP32 + GPS +    |                         | (Cloud, VPS o local) |
+|  SIM800L + Sensor)|                         +---------------------+
+|                   |                         ^           |
+| - Detecta ON/OFF  |                         |           |
+| - Captura lat/lng |                         |     REST API
++-------------------+                         |           v
+                                              |    +---------------+
+                                    HTTPS      --> |     Base de     |
+                                                    |     Datos       |
+                                                    +---------------+
+                                                           |
+                                                           |
+                                                   +---------------+
+                                                   |     App móvil  |
+                                                   |  (Flutter/React|
+                                                   |   Native/iOS)  |
+                                                   +---------------+
+
+🛠 Tecnologías
+Backend: Spring Boot 3.5.3 + JWT + WebSocket (STOMP)
+Base de datos: MySQL + Redis
+Hardware: ESP32, SIM800L, GPS Module
+Frontend móvil: Flutter
+Mensajería: STOMP over WebSocket
+Seguridad: Spring Security, BCrypt, Tokens de Refresh con Redis
