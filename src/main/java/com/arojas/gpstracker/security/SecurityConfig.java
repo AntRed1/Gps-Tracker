@@ -40,7 +40,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import lombok.RequiredArgsConstructor;
 
 /**
- *
  * @author neta1
  */
 @Configuration
@@ -50,7 +49,6 @@ public class SecurityConfig {
 
   private final JwtFilter jwtFilter;
   private final UserDetailsService userDetailsService;
-  private final PasswordEncoder passwordEncoder;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -68,7 +66,7 @@ public class SecurityConfig {
   @Bean
   public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
     AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-    builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     return builder.build();
   }
 
