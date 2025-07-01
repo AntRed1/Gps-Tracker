@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 
 import com.arojas.gpstracker.dto.LoginRequest;
 import com.arojas.gpstracker.dto.LogoutRequest;
@@ -60,9 +61,9 @@ public class AuthController {
       @ApiResponse(responseCode = "400", description = "Invalid input data")
   })
   @PostMapping("/register")
-  public ResponseEntity<com.arojas.gpstracker.dto.ApiResponse<TokenResponse>> register(
+  public ResponseEntity<ApiResponse<TokenResponse>> register(
       @Valid @RequestBody RegisterRequest request) {
-    return ResponseEntity.ok(com.arojas.gpstracker.dto.ApiResponse.success(authService.register(request)));
+    return ResponseEntity.ok(ApiResponse.success(authService.register(request)));
   }
 
   @Operation(summary = "User login", description = "Authenticates a user and returns JWT tokens")
@@ -71,9 +72,9 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "Invalid credentials")
   })
   @PostMapping("/login")
-  public ResponseEntity<com.arojas.gpstracker.dto.ApiResponse<TokenResponse>> login(
+  public ResponseEntity<ApiResponse<TokenResponse>> login(
       @Valid @RequestBody LoginRequest request) {
-    return ResponseEntity.ok(com.arojas.gpstracker.dto.ApiResponse.success(authService.login(request)));
+    return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
   }
 
   @Operation(summary = "Refresh tokens", description = "Refreshes access and refresh tokens")
@@ -82,10 +83,9 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "Invalid refresh token")
   })
   @PostMapping("/refresh")
-  public ResponseEntity<com.arojas.gpstracker.dto.ApiResponse<TokenResponse>> refreshToken(
+  public ResponseEntity<ApiResponse<TokenResponse>> refreshToken(
       @Valid @RequestBody RefreshTokenRequest request) {
-    return ResponseEntity.ok(com.arojas.gpstracker.dto.ApiResponse.success(
-        authService.refresh(request.getRefreshToken())));
+    return ResponseEntity.ok(ApiResponse.success(authService.refresh(request.getRefreshToken())));
   }
 
   @Operation(summary = "Logout user", description = "Revokes refresh token in Redis")
