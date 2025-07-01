@@ -31,6 +31,7 @@ import javax.validation.Valid;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,6 +53,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Controller for managing alerts.
  *
  * @author neta1
  */
@@ -87,7 +89,8 @@ public class AlertController {
       @RequestParam(defaultValue = "20") int size,
       @RequestParam(required = false) Boolean resolved) {
     log.info("Fetching alerts for device: {}, page: {}, size: {}, resolved: {}", deviceId, page, size, resolved);
-    Page<Alert> alerts = alertService.getAlertsForDevice(deviceId, resolved, PageRequest.of(page, size));
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Alert> alerts = alertService.getAlertsForDevice(deviceId, resolved, pageable);
     Page<AlertResponse> dtos = alerts.map(alertMapper::toResponse);
     return ResponseEntity.ok(ApiResponse.success(dtos));
   }

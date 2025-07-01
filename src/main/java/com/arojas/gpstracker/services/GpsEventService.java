@@ -27,6 +27,8 @@ package com.arojas.gpstracker.services;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import com.arojas.gpstracker.entities.Device;
@@ -48,55 +50,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GpsEventService {
 
-  private final GpsEventRepository eventRepository;
-  private final DeviceRepository deviceRepository;
+    private final GpsEventRepository eventRepository;
+    private final DeviceRepository deviceRepository;
 
-  /**
-   * Registra un evento GPS (ON/OFF) para un dispositivo.
-   *
-   * @param deviceId  ID del dispositivo
-   * @param eventType Tipo de evento (ON, OFF)
-   * @return Evento registrado
-   */
-  public GpsEvent registerEvent(Long deviceId, EventType eventType) {
-    Device device = deviceRepository.findById(deviceId)
-        .orElseThrow(() -> new NotFoundException("Dispositivo no encontrado con ID: " + deviceId));
+    public GpsEvent registerEvent(Long deviceId, EventType eventType) {
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new NotFoundException("Dispositivo no encontrado con ID: " + deviceId));
 
-    GpsEvent event = GpsEvent.builder()
-        .device(device)
-        .eventType(eventType)
-        .timestamp(LocalDateTime.now())
-        .build();
+        GpsEvent event = GpsEvent.builder()
+                .device(device)
+                .eventType(eventType)
+                .timestamp(LocalDateTime.now())
+                .build();
 
-    log.info("Registrando evento '{}' para dispositivo ID {}", eventType, deviceId);
+        log.info("Registrando evento '{}' para dispositivo ID {}", eventType, deviceId);
 
-    return eventRepository.save(event);
-  }
+        return eventRepository.save(event);
+    }
 
-  /**
-   * Obtiene los últimos N eventos para un dispositivo, ordenados por fecha
-   * descendente.
-   *
-   * @param deviceId ID del dispositivo
-   * @param limit    Cantidad máxima de eventos a retornar
-   * @return Lista de eventos
-   */
-  public List<GpsEvent> getRecentEvents(Long deviceId, int limit) {
-    log.debug("Consultando últimos {} eventos para dispositivo ID {}", limit, deviceId);
-    // Usar el método findTop10ByDeviceIdOrderByTimestampDesc y ajustar el límite si
-    // se requiere un método genérico
-    return eventRepository.findTop10ByDeviceIdOrderByTimestampDesc(deviceId);
-  }
+    public Page<GpsEvent> getRecentEvents(Long deviceId, Pageable pageable) {
+        log.debug("Consultando eventos recientes para dispositivo ID {}", deviceId);
+        return eventRepository.findByDeviceId(deviceId, pageable);
+    }
 
-  /**
-   * Obtiene eventos filtrados por dispositivo y tipo.
-   *
-   * @param deviceId  ID del dispositivo
-   * @param eventType Tipo de evento
-   * @return Lista de eventos filtrados
-   */
-  public List<GpsEvent> getEventsByType(Long deviceId, EventType eventType) {
-    log.debug("Consultando eventos de tipo '{}' para dispositivo ID {}", eventType, deviceId);
-    return eventRepository.findByDeviceIdAndEventType(deviceId, eventType);
-  }
+    public List<GpsEvent> getEventsByType(Long deviceId, EventType eventType) {
+        log.debug("Consultando eventos de tipo '{}' para dispositivo ID {}", eventType, deviceId);
+        return eventRepository.findByDeviceIdAndEventType(deviceId, eventType);
+    }
 }

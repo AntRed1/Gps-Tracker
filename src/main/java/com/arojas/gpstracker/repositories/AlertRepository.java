@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -45,9 +47,9 @@ import com.arojas.gpstracker.entities.Alert.AlertType;
  */
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, Long> {
-  List<Alert> findByDeviceId(Long deviceId);
+  Page<Alert> findByDeviceId(Long deviceId, Pageable pageable);
 
-  List<Alert> findByDeviceIdAndResolved(Long deviceId, boolean resolved);
+  Page<Alert> findByDeviceIdAndResolved(Long deviceId, boolean resolved, Pageable pageable);
 
   List<Alert> findByDeviceIdAndType(Long deviceId, AlertType type);
 
@@ -57,7 +59,6 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
 
   Optional<Alert> findByIdAndDeviceId(Long id, Long deviceId);
 
-  // Reemplazo de procedimiento almacenado
   @Modifying
   @Query("UPDATE Alert a SET a.resolved = true, a.resolvedAt = :resolvedAt WHERE a.id = :alertId")
   void resolveAlert(@Param("alertId") Long alertId, @Param("resolvedAt") LocalDateTime resolvedAt);

@@ -24,9 +24,9 @@
 
 package com.arojas.gpstracker.controllers;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,8 +34,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.arojas.gpstracker.dto.ApiResponse;
 import com.arojas.gpstracker.dto.DeviceResponse;
 import com.arojas.gpstracker.dto.PasswordChangeRequest;
 import com.arojas.gpstracker.dto.UserResponse;
@@ -49,11 +51,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
+ * Controller for managing and querying authenticated user data.
  *
  * @author neta1
- *         * Controlador para gestión y consulta de datos de usuario
- *         autenticado.
- * 
  */
 @RestController
 @RequestMapping("/users")
@@ -63,9 +63,6 @@ public class UserController {
   private final UserService userService;
   private final DeviceService deviceService;
 
-  /**
-   * Obtener perfil del usuario autenticado.
-   */
   @GetMapping("/me")
   public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
     User user = userService.findByEmail(userDetails.getUsername())
@@ -75,9 +72,6 @@ public class UserController {
     return ResponseEntity.ok(response);
   }
 
-  /**
-   * Actualizar datos del usuario autenticado.
-   */
   @PutMapping("/me")
   public ResponseEntity<UserResponse> updateProfile(@AuthenticationPrincipal UserDetails userDetails,
       @Valid @RequestBody UserUpdateRequest updateRequest) {
@@ -86,34 +80,27 @@ public class UserController {
     return ResponseEntity.ok(response);
   }
 
-  /**
-   * Listar dispositivos del usuario autenticado.
-   */
   @GetMapping("/me/devices")
-  public ResponseEntity<List<DeviceResponse>> listUserDevices(@AuthenticationPrincipal UserDetails userDetails) {
+  public ResponseEntity<ApiResponse<Page<DeviceResponse>>> listUserDevices(
+      @AuthenticationPrincipal UserDetails userDetails,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
     User user = userService.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-    List<Device> devices = deviceService.getUserDevices(user.getId());
-
-    List<DeviceResponse> response = devices.stream()
-        .map(d -> new DeviceResponse(d.getId(), d.getDeviceIdentifier(), d.getAlias(), d.getActivated()))
-        .collect(Collectors.toList());
-
-    return ResponseEntity.ok(response);
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Device> devices = deviceService.getUserDevices(user.getId(), pageable);
+    Page<DeviceResponse> response = devices
+        .map(d -> new DeviceResponse(d.getId(), d.getDeviceIdentifier(), d.getAlias(), d.getActivated()));
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  /**
-   * Cambiar contraseña del usuario autenticado.
-   */
   @PutMapping("/me/password")
   public ResponseEntity<Void> changePassword(@AuthenticationPrincipal UserDetails userDetails,
       @Valid @RequestBody PasswordChangeRequest passwordChangeRequest) {
     userService.changePassword(userDetails.getUsername(),
         passwordChangeRequest.getCurrentPassword(),
         passwordChangeRequest.getNewPassword());
-
     return ResponseEntity.noContent().build();
   }
-
 }

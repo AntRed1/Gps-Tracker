@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,6 +52,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Controller for managing GPS events.
  *
  * @author neta1
  */
@@ -77,7 +79,8 @@ public class GpsEventController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     log.info("Fetching recent events for device: {}, page: {}, size: {}", deviceId, page, size);
-    Page<GpsEvent> events = gpsEventService.getRecentEvents(deviceId, PageRequest.of(page, size));
+    Pageable pageable = PageRequest.of(page, size);
+    Page<GpsEvent> events = gpsEventService.getRecentEvents(deviceId, pageable);
     Page<GpsEventDTO> dtos = events.map(gpsEventMapper::toDto);
     return ResponseEntity.ok(ApiResponse.success(dtos));
   }

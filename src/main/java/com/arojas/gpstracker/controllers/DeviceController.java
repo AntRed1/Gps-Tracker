@@ -26,9 +26,10 @@ package com.arojas.gpstracker.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -54,6 +55,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Controller for managing devices.
  *
  * @author neta1
  */
@@ -74,7 +76,7 @@ public class DeviceController {
     log.info("Solicitud para registrar dispositivo: {}", request.getDeviceIdentifier());
     User user = userService.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-    Device device = deviceService.registerDevice(deviceMapper.toEntity(request), user);
+    Device device = deviceService.registerDevice(request, user);
     return ResponseEntity.ok(ApiResponse.success(deviceMapper.toResponse(device)));
   }
 
@@ -86,7 +88,8 @@ public class DeviceController {
     log.debug("Listando dispositivos del usuario: {}", userDetails.getUsername());
     User user = userService.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
-    Page<Device> devices = deviceService.getUserDevices(user.getId(), PageRequest.of(page, size));
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Device> devices = deviceService.getUserDevices(user.getId(), pageable);
     Page<DeviceResponse> response = devices.map(deviceMapper::toResponse);
     return ResponseEntity.ok(ApiResponse.success(response));
   }

@@ -44,6 +44,7 @@ import com.arojas.gpstracker.dto.GpsLocationDTO;
 import com.arojas.gpstracker.entities.GpsLocation;
 import com.arojas.gpstracker.exception.BadRequestException;
 import com.arojas.gpstracker.exception.NotFoundException;
+import com.arojas.gpstracker.mappers.GpsLocationMapper;
 import com.arojas.gpstracker.repositories.DeviceRepository;
 import com.arojas.gpstracker.repositories.GpsLocationRepository;
 
@@ -65,17 +66,8 @@ public class GpsLocationService {
   private final GpsLocationRepository locationRepository;
   private final DeviceRepository deviceRepository;
   private final SimpMessagingTemplate messagingTemplate;
+  private final GpsLocationMapper gpsLocationMapper;
 
-  /**
-   * Saves a new GPS location for a device using a stored procedure.
-   *
-   * @param deviceId  ID of the device
-   * @param latitude  Latitude (between -90 and 90)
-   * @param longitude Longitude (between -180 and 180)
-   * @return The saved location
-   * @throws BadRequestException if coordinates are invalid
-   * @throws NotFoundException   if device is not found
-   */
   @Transactional
   public GpsLocation saveLocation(
       Long deviceId,
@@ -87,31 +79,18 @@ public class GpsLocationService {
 
     log.info("Saving location for device {}: ({}, {})", deviceId, latitude, longitude);
 
-    // Use stored procedure to insert location
     locationRepository.insertLocation(deviceId, latitude, longitude);
 
-    // Retrieve the newly inserted location to return it
     GpsLocation location = locationRepository.findTopByDeviceIdOrderByTimestampDesc(deviceId)
         .orElseThrow(() -> new NotFoundException("Failed to retrieve newly inserted location for device: " + deviceId));
 
-    // Send WebSocket notification
-    GpsLocationDTO dto = toDto(location);
+    GpsLocationDTO dto = gpsLocationMapper.toDto(location);
     messagingTemplate.convertAndSend("/topic/gps-updates/" + deviceId, dto);
     log.debug("Sent WebSocket notification for device {}: {}", deviceId, dto);
 
     return location;
   }
 
-  /**
-   * Retrieves paginated GPS locations for a device, ordered by timestamp
-   * descending.
-   *
-   * @param deviceId ID of the device
-   * @param page     Page number (0-based)
-   * @param size     Page size
-   * @return Paginated list of locations
-   * @throws NotFoundException if device is not found
-   */
   @Cacheable(value = "deviceLocations", key = "#deviceId + '-' + #page + '-' + #size")
   @Transactional(readOnly = true)
   public Page<GpsLocation> getLocationsForDevice(Long deviceId, int page, int size) {
@@ -124,12 +103,6 @@ public class GpsLocationService {
     return locationRepository.findAllByDeviceIdOrderByTimestampDesc(deviceId, pageable);
   }
 
-  /**
-   * Retrieves the latest GPS location for a device.
-   *
-   * @param deviceId ID of the device
-   * @return Optional containing the latest location, or empty if none exists
-   */
   @Cacheable(value = "lastLocation", key = "#deviceId")
   @Transactional(readOnly = true)
   public Optional<GpsLocation> getLastLocation(Long deviceId) {
@@ -137,15 +110,6 @@ public class GpsLocationService {
     return locationRepository.findTopByDeviceIdOrderByTimestampDesc(deviceId);
   }
 
-  /**
-   * Retrieves locations for a device within a time range.
-   *
-   * @param deviceId ID of the device
-   * @param start    Start of the time range
-   * @param end      End of the time range
-   * @return List of locations within the specified time range
-   * @throws NotFoundException if device is not found
-   */
   @Transactional(readOnly = true)
   public List<GpsLocation> getLocationsByTimeRange(Long deviceId, LocalDateTime start, LocalDateTime end) {
     if (!deviceRepository.existsById(deviceId)) {
@@ -158,21 +122,5 @@ public class GpsLocationService {
 
     log.debug("Fetching locations for device ID {} between {} and {}", deviceId, start, end);
     return locationRepository.findByDeviceIdAndTimestampBetweenOrderByTimestampDesc(deviceId, start, end);
-  }
-
-  /**
-   * Converts a GpsLocation entity to a DTO.
-   *
-   * @param location The GPS location entity
-   * @return GpsLocationDTO
-   */
-  private GpsLocationDTO toDto(GpsLocation location) {
-    return GpsLocationDTO.builder()
-        .id(location.getId())
-        .latitude(location.getLatitude())
-        .longitude(location.getLongitude())
-        .timestamp(location.getTimestamp())
-        .deviceId(location.getDevice().getId())
-        .build();
   }
 }

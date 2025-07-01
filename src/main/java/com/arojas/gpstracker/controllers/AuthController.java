@@ -24,15 +24,12 @@
 
 package com.arojas.gpstracker.controllers;
 
-import javax.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arojas.gpstracker.dto.ApiResponse;
 import com.arojas.gpstracker.dto.LoginRequest;
 import com.arojas.gpstracker.dto.LogoutRequest;
 import com.arojas.gpstracker.dto.RefreshTokenRequest;
@@ -41,14 +38,14 @@ import com.arojas.gpstracker.dto.TokenResponse;
 import com.arojas.gpstracker.services.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse; // Import correcto de Swagger
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- *
- * @author neta1
- *         Controlador responsable de la autenticación y gestión de tokens.
- * 
+ * @author arojas
+ *         Controller responsible for authentication and token management.
  */
 @RestController
 @RequestMapping("/auth")
@@ -63,8 +60,9 @@ public class AuthController {
       @ApiResponse(responseCode = "400", description = "Invalid input data")
   })
   @PostMapping("/register")
-  public ResponseEntity<ApiResponse<TokenResponse>> register(@Valid @RequestBody RegisterRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.register(request)));
+  public ResponseEntity<com.arojas.gpstracker.dto.ApiResponse<TokenResponse>> register(
+      @Valid @RequestBody RegisterRequest request) {
+    return ResponseEntity.ok(com.arojas.gpstracker.dto.ApiResponse.success(authService.register(request)));
   }
 
   @Operation(summary = "User login", description = "Authenticates a user and returns JWT tokens")
@@ -73,8 +71,9 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "Invalid credentials")
   })
   @PostMapping("/login")
-  public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody LoginRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
+  public ResponseEntity<com.arojas.gpstracker.dto.ApiResponse<TokenResponse>> login(
+      @Valid @RequestBody LoginRequest request) {
+    return ResponseEntity.ok(com.arojas.gpstracker.dto.ApiResponse.success(authService.login(request)));
   }
 
   @Operation(summary = "Refresh tokens", description = "Refreshes access and refresh tokens")
@@ -83,8 +82,10 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "Invalid refresh token")
   })
   @PostMapping("/refresh")
-  public ResponseEntity<ApiResponse<TokenResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.refresh(request.getRefreshToken())));
+  public ResponseEntity<com.arojas.gpstracker.dto.ApiResponse<TokenResponse>> refreshToken(
+      @Valid @RequestBody RefreshTokenRequest request) {
+    return ResponseEntity.ok(com.arojas.gpstracker.dto.ApiResponse.success(
+        authService.refresh(request.getRefreshToken())));
   }
 
   @Operation(summary = "Logout user", description = "Revokes refresh token in Redis")

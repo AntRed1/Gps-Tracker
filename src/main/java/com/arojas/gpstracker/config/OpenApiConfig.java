@@ -22,31 +22,25 @@
  * THE SOFTWARE.
  */
 
-package com.arojas.gpstracker.repositories;
+package com.arojas.gpstracker.config;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import com.arojas.gpstracker.entities.GpsEvent;
-import com.arojas.gpstracker.entities.GpsEvent.EventType;
+import io.swagger.v3.oas.models.info.Info;
 
 /**
  *
  * @author neta1
- *         * Repositorio para gestión de eventos GPS.
- * 
  */
-@Repository
-public interface GpsEventRepository extends JpaRepository<GpsEvent, Long> {
-  Page<GpsEvent> findByDeviceId(Long deviceId, Pageable pageable);
-
-  List<GpsEvent> findByDeviceIdAndEventType(Long deviceId, EventType eventType);
-
-  List<GpsEvent> findByDeviceIdAndTimestampBetweenOrderByTimestampDesc(Long deviceId,
-      LocalDateTime start, LocalDateTime end);
+@Configuration
+public class OpenApiConfig {
+  @Bean
+  public OpenApiCustomizer openApiCustomizer() {
+    return openApi -> openApi.info(new Info()
+        .title("GPS Tracker API")
+        .version("1.0")
+        .description("API for GPS tracking system"));
+  }
 }

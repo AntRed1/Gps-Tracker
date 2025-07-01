@@ -28,6 +28,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.arojas.gpstracker.dto.GpsLocationMessage;
+import com.arojas.gpstracker.exception.BadRequestException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,17 @@ public class GpsLocationConsumer {
   public void processLocation(GpsLocationMessage message) {
     log.info("Processing location for device: {}, lat: {}, lng: {}",
         message.getDeviceId(), message.getLatitude(), message.getLongitude());
+
+    // Validar coordenadas
+    if (message.getLatitude() < -90.0 || message.getLatitude() > 90.0) {
+      log.error("Invalid latitude: {}", message.getLatitude());
+      throw new BadRequestException("Latitude must be between -90 and 90");
+    }
+    if (message.getLongitude() < -180.0 || message.getLongitude() > 180.0) {
+      log.error("Invalid longitude: {}", message.getLongitude());
+      throw new BadRequestException("Longitude must be between -180 and 180");
+    }
+
     gpsLocationService.saveLocation(message.getDeviceId(), message.getLatitude(), message.getLongitude());
   }
 }

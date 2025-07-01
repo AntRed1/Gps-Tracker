@@ -24,9 +24,10 @@
 
 package com.arojas.gpstracker.repositories;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -38,7 +39,7 @@ import com.arojas.gpstracker.entities.Device;
  */
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
-  Optional<Device> findByDeviceIdentifier(String deviceIdentifier);
+    Optional<Device> findByDeviceIdentifier(String deviceIdentifier);
 
-  List<Device> findAllByUserId(Long userId);
+    Page<Device> findByUserId(Long userId, Pageable pageable);
 }
