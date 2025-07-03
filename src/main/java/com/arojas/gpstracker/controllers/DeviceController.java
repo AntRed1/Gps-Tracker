@@ -28,8 +28,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arojas.gpstracker.dto.ApiResponse;
+import com.arojas.gpstracker.dto.ApiResponseWrapper;
 import com.arojas.gpstracker.dto.DeviceRegisterRequest;
 import com.arojas.gpstracker.dto.DeviceResponse;
 import com.arojas.gpstracker.entities.Device;
@@ -70,18 +70,18 @@ public class DeviceController {
   private final DeviceMapper deviceMapper;
 
   @PostMapping("/register")
-  public ResponseEntity<ApiResponse<DeviceResponse>> registerDevice(
+  public ResponseEntity<ApiResponseWrapper<DeviceResponse>> registerDevice(
       @AuthenticationPrincipal UserDetails userDetails,
       @Valid @RequestBody DeviceRegisterRequest request) {
     log.info("Solicitud para registrar dispositivo: {}", request.getDeviceIdentifier());
     User user = userService.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
     Device device = deviceService.registerDevice(request, user);
-    return ResponseEntity.ok(ApiResponse.success(deviceMapper.toResponse(device)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(deviceMapper.toResponse(device)));
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<Page<DeviceResponse>>> getAllUserDevices(
+  public ResponseEntity<ApiResponseWrapper<Page<DeviceResponse>>> getAllUserDevices(
       @AuthenticationPrincipal UserDetails userDetails,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
@@ -91,18 +91,18 @@ public class DeviceController {
     Pageable pageable = PageRequest.of(page, size);
     Page<Device> devices = deviceService.getUserDevices(user.getId(), pageable);
     Page<DeviceResponse> response = devices.map(deviceMapper::toResponse);
-    return ResponseEntity.ok(ApiResponse.success(response));
+    return ResponseEntity.ok(ApiResponseWrapper.success(response));
   }
 
   @PatchMapping("/{deviceId}/activation")
-  public ResponseEntity<ApiResponse<DeviceResponse>> toggleDeviceActivation(
+  public ResponseEntity<ApiResponseWrapper<DeviceResponse>> toggleDeviceActivation(
       @AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long deviceId,
       @RequestParam boolean activate) {
     User user = userService.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
     Device device = deviceService.toggleDeviceActivation(deviceId, user, activate);
-    return ResponseEntity.ok(ApiResponse.success(deviceMapper.toResponse(device)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(deviceMapper.toResponse(device)));
   }
 
   @DeleteMapping("/{deviceId}")
@@ -116,12 +116,12 @@ public class DeviceController {
   }
 
   @GetMapping("/{deviceId}")
-  public ResponseEntity<ApiResponse<DeviceResponse>> getDeviceById(
+  public ResponseEntity<ApiResponseWrapper<DeviceResponse>> getDeviceById(
       @AuthenticationPrincipal UserDetails userDetails,
       @PathVariable Long deviceId) {
     User user = userService.findByEmail(userDetails.getUsername())
         .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
     Device device = deviceService.getDeviceById(deviceId, user);
-    return ResponseEntity.ok(ApiResponse.success(deviceMapper.toResponse(device)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(deviceMapper.toResponse(device)));
   }
 }

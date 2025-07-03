@@ -25,18 +25,23 @@
 package com.arojas.gpstracker.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import com.arojas.gpstracker.dto.UserResponse;
 import com.arojas.gpstracker.dto.UserUpdateRequest;
 import com.arojas.gpstracker.entities.User;
 
 /**
- *
  * @author neta1
  */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
   UserResponse toResponse(User user);
 
+  @Mapping(target = "id", ignore = true) // Ignorar porque es generado automáticamente
+  @Mapping(target = "createdAt", ignore = true) // Ignorar porque tiene valor por defecto
+  @Mapping(target = "devices", ignore = true) // Ignorar porque se gestiona en otra parte
+  @Mapping(target = "password", ignore = true) // Ignorar si no se actualiza en UserUpdateRequest
+  @Mapping(target = "email", ignore = true) // Ignorar porque no se actualiza en UserUpdateRequest
   User toEntity(UserUpdateRequest request);
 }

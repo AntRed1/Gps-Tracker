@@ -40,5 +40,10 @@ public interface DeviceMapper {
   DeviceResponse toResponse(Device device);
 
   @Mapping(target = "user", ignore = true)
+  @Mapping(target = "id", ignore = true) // Ignorar porque es generado automáticamente
+  @Mapping(target = "activated", ignore = true) // Ignorar porque tiene valor por defecto
+  @Mapping(target = "createdAt", ignore = true) // Ignorar porque se establece con LocalDateTime.now()
+  @Mapping(target = "locations", ignore = true) // Ignorar porque se gestiona en otra parte
+  @Mapping(target = "events", ignore = true) // Ignorar porque se gestiona en otra parte
   Device toEntity(DeviceRegisterRequest request);
 }

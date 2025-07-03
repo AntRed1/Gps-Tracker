@@ -39,18 +39,18 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponse<T> {
+public class ApiResponseWrapper<T> {
 
   private boolean success;
   private T data;
   private String message;
 
-  public static <T> ApiResponse<T> success(T data) {
-    return new ApiResponse<>(true, data, null);
+  public static <T> ApiResponseWrapper<T> success(T data) {
+    return new ApiResponseWrapper<>(true, data, null);
   }
 
-  public static <T> ApiResponse<T> error(String message) {
-    return new ApiResponse<>(false, null, message);
+  public static <T> ApiResponseWrapper<T> error(String message) {
+    return new ApiResponseWrapper<>(false, null, message);
   }
 
 }

@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arojas.gpstracker.dto.ApiResponse;
+import com.arojas.gpstracker.dto.ApiResponseWrapper;
 import com.arojas.gpstracker.dto.DeviceResponse;
 import com.arojas.gpstracker.dto.PasswordChangeRequest;
 import com.arojas.gpstracker.dto.UserResponse;
@@ -81,7 +81,7 @@ public class UserController {
   }
 
   @GetMapping("/me/devices")
-  public ResponseEntity<ApiResponse<Page<DeviceResponse>>> listUserDevices(
+  public ResponseEntity<ApiResponseWrapper<Page<DeviceResponse>>> listUserDevices(
       @AuthenticationPrincipal UserDetails userDetails,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
@@ -92,7 +92,7 @@ public class UserController {
     Page<Device> devices = deviceService.getUserDevices(user.getId(), pageable);
     Page<DeviceResponse> response = devices
         .map(d -> new DeviceResponse(d.getId(), d.getDeviceIdentifier(), d.getAlias(), d.getActivated()));
-    return ResponseEntity.ok(ApiResponse.success(response));
+    return ResponseEntity.ok(ApiResponseWrapper.success(response));
   }
 
   @PutMapping("/me/password")

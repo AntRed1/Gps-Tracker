@@ -25,18 +25,22 @@
 package com.arojas.gpstracker.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import com.arojas.gpstracker.dto.GpsEventDTO;
 import com.arojas.gpstracker.dto.GpsEventRequest;
 import com.arojas.gpstracker.entities.GpsEvent;
 
 /**
- *
  * @author neta1
  */
 @Mapper(componentModel = "spring")
 public interface GpsEventMapper {
-  GpsEventDTO toDto(GpsEvent event);
+    @Mapping(source = "device.id", target = "deviceId") // Mapear device.id a deviceId
+    GpsEventDTO toDto(GpsEvent event);
 
-  GpsEvent toEntity(GpsEventRequest request);
+    @Mapping(target = "id", ignore = true) // Ignorar porque es generado automáticamente
+    @Mapping(target = "timestamp", ignore = true) // Ignorar porque tiene valor por defecto
+    @Mapping(target = "device", ignore = true) // Ignorar porque se gestiona en otra parte
+    GpsEvent toEntity(GpsEventRequest request);
 }

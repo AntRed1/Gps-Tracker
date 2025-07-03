@@ -29,8 +29,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 
+import com.arojas.gpstracker.dto.ApiResponseWrapper;
 import com.arojas.gpstracker.dto.LoginRequest;
 import com.arojas.gpstracker.dto.LogoutRequest;
 import com.arojas.gpstracker.dto.RefreshTokenRequest;
@@ -39,7 +39,7 @@ import com.arojas.gpstracker.dto.TokenResponse;
 import com.arojas.gpstracker.services.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse; // Import correcto de Swagger
+import io.swagger.v3.oas.annotations.responses.ApiResponse; // Importa la anotación correcta
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,9 +61,9 @@ public class AuthController {
       @ApiResponse(responseCode = "400", description = "Invalid input data")
   })
   @PostMapping("/register")
-  public ResponseEntity<ApiResponse<TokenResponse>> register(
+  public ResponseEntity<ApiResponseWrapper<TokenResponse>> register(
       @Valid @RequestBody RegisterRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.register(request)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(authService.register(request)));
   }
 
   @Operation(summary = "User login", description = "Authenticates a user and returns JWT tokens")
@@ -72,9 +72,9 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "Invalid credentials")
   })
   @PostMapping("/login")
-  public ResponseEntity<ApiResponse<TokenResponse>> login(
+  public ResponseEntity<ApiResponseWrapper<TokenResponse>> login(
       @Valid @RequestBody LoginRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(authService.login(request)));
   }
 
   @Operation(summary = "Refresh tokens", description = "Refreshes access and refresh tokens")
@@ -83,9 +83,9 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "Invalid refresh token")
   })
   @PostMapping("/refresh")
-  public ResponseEntity<ApiResponse<TokenResponse>> refreshToken(
+  public ResponseEntity<ApiResponseWrapper<TokenResponse>> refreshToken(
       @Valid @RequestBody RefreshTokenRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.refresh(request.getRefreshToken())));
+    return ResponseEntity.ok(ApiResponseWrapper.success(authService.refresh(request.getRefreshToken())));
   }
 
   @Operation(summary = "Logout user", description = "Revokes refresh token in Redis")

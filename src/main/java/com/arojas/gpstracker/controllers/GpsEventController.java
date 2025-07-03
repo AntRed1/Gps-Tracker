@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arojas.gpstracker.dto.ApiResponse;
+import com.arojas.gpstracker.dto.ApiResponseWrapper;
 import com.arojas.gpstracker.dto.GpsEventDTO;
 import com.arojas.gpstracker.dto.GpsEventRequest;
 import com.arojas.gpstracker.entities.GpsEvent;
@@ -65,16 +65,16 @@ public class GpsEventController {
   private final GpsEventMapper gpsEventMapper;
 
   @PostMapping("/device/{deviceId}")
-  public ResponseEntity<ApiResponse<GpsEventDTO>> registerEvent(
+  public ResponseEntity<ApiResponseWrapper<GpsEventDTO>> registerEvent(
       @PathVariable Long deviceId,
       @Valid @RequestBody GpsEventRequest request) {
     log.info("Registering event for device: {}", deviceId);
     GpsEvent event = gpsEventService.registerEvent(deviceId, request.getEventType());
-    return ResponseEntity.ok(ApiResponse.success(gpsEventMapper.toDto(event)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(gpsEventMapper.toDto(event)));
   }
 
   @GetMapping("/device/{deviceId}")
-  public ResponseEntity<ApiResponse<Page<GpsEventDTO>>> getRecentEvents(
+  public ResponseEntity<ApiResponseWrapper<Page<GpsEventDTO>>> getRecentEvents(
       @PathVariable Long deviceId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
@@ -82,11 +82,11 @@ public class GpsEventController {
     Pageable pageable = PageRequest.of(page, size);
     Page<GpsEvent> events = gpsEventService.getRecentEvents(deviceId, pageable);
     Page<GpsEventDTO> dtos = events.map(gpsEventMapper::toDto);
-    return ResponseEntity.ok(ApiResponse.success(dtos));
+    return ResponseEntity.ok(ApiResponseWrapper.success(dtos));
   }
 
   @GetMapping("/device/{deviceId}/type")
-  public ResponseEntity<ApiResponse<List<GpsEventDTO>>> getEventsByType(
+  public ResponseEntity<ApiResponseWrapper<List<GpsEventDTO>>> getEventsByType(
       @PathVariable Long deviceId,
       @RequestParam EventType type) {
     log.info("Fetching events of type {} for device: {}", type, deviceId);
@@ -94,6 +94,6 @@ public class GpsEventController {
         .stream()
         .map(gpsEventMapper::toDto)
         .collect(Collectors.toList());
-    return ResponseEntity.ok(ApiResponse.success(dtos));
+    return ResponseEntity.ok(ApiResponseWrapper.success(dtos));
   }
 }

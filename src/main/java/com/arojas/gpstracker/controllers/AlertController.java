@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.arojas.gpstracker.dto.AlertRequest;
 import com.arojas.gpstracker.dto.AlertResponse;
-import com.arojas.gpstracker.dto.ApiResponse;
+import com.arojas.gpstracker.dto.ApiResponseWrapper;
 import com.arojas.gpstracker.entities.Alert;
 import com.arojas.gpstracker.mappers.AlertMapper;
 import com.arojas.gpstracker.services.AlertService;
@@ -66,24 +66,24 @@ public class AlertController {
   private final AlertMapper alertMapper;
 
   @PostMapping("/device/{deviceId}")
-  public ResponseEntity<ApiResponse<AlertResponse>> createAlert(
+  public ResponseEntity<ApiResponseWrapper<AlertResponse>> createAlert(
       @PathVariable Long deviceId,
       @Valid @RequestBody AlertRequest alertRequest) {
     log.info("Creating alert for device: {}", deviceId);
     Alert alert = alertMapper.toEntity(alertRequest);
     Alert created = alertService.createAlert(deviceId, alert);
-    return ResponseEntity.ok(ApiResponse.success(alertMapper.toResponse(created)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(alertMapper.toResponse(created)));
   }
 
   @PutMapping("/{id}/resolve")
-  public ResponseEntity<ApiResponse<AlertResponse>> resolveAlert(@PathVariable Long id) {
+  public ResponseEntity<ApiResponseWrapper<AlertResponse>> resolveAlert(@PathVariable Long id) {
     log.info("Resolving alert with ID: {}", id);
     Alert resolved = alertService.resolveAlert(id);
-    return ResponseEntity.ok(ApiResponse.success(alertMapper.toResponse(resolved)));
+    return ResponseEntity.ok(ApiResponseWrapper.success(alertMapper.toResponse(resolved)));
   }
 
   @GetMapping("/device/{deviceId}")
-  public ResponseEntity<ApiResponse<Page<AlertResponse>>> getAlertsForDevice(
+  public ResponseEntity<ApiResponseWrapper<Page<AlertResponse>>> getAlertsForDevice(
       @PathVariable Long deviceId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
@@ -92,16 +92,16 @@ public class AlertController {
     Pageable pageable = PageRequest.of(page, size);
     Page<Alert> alerts = alertService.getAlertsForDevice(deviceId, resolved, pageable);
     Page<AlertResponse> dtos = alerts.map(alertMapper::toResponse);
-    return ResponseEntity.ok(ApiResponse.success(dtos));
+    return ResponseEntity.ok(ApiResponseWrapper.success(dtos));
   }
 
   @GetMapping("/unresolved")
-  public ResponseEntity<ApiResponse<List<AlertResponse>>> getUnresolvedAlerts() {
+  public ResponseEntity<ApiResponseWrapper<List<AlertResponse>>> getUnresolvedAlerts() {
     log.info("Fetching unresolved alerts");
     List<AlertResponse> dtos = alertService.getUnresolvedAlerts()
         .stream()
         .map(alertMapper::toResponse)
         .collect(Collectors.toList());
-    return ResponseEntity.ok(ApiResponse.success(dtos));
+    return ResponseEntity.ok(ApiResponseWrapper.success(dtos));
   }
 }

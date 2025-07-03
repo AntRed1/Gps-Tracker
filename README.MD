@@ -1,7 +1,14 @@
-📍 GPS Tracker System
-Un sistema GPS moderno que permite rastrear vehículos en tiempo real utilizando hardware embebido (ESP32 + SIM800L + GPS), y una arquitectura backend robusta con notificaciones vía WebSocket, autenticación JWT y almacenamiento en base de datos. Incluye una app móvil Flutter para consulta de eventos, alertas y ubicaciones.
+# 📍 GPS Tracker System
 
-🗂 Estructura del Proyecto
+```bash
+Un sistema GPS moderno que permite rastrear vehículos en tiempo real utilizando hardware embebido (ESP32 + SIM800L + GPS), y una arquitectura backend robusta con notificaciones vía WebSocket, autenticación JWT y almacenamiento en base de datos. Incluye una app móvil Flutter para consulta de eventos, alertas y ubicaciones.
+```
+
+---
+
+## 🗂 Estructura del Proyecto
+
+```bash
 src/main/java/com/arojas/gpstracker/
 │
 ├── config/
@@ -72,8 +79,13 @@ src/main/java/com/arojas/gpstracker/
     ├── GpsLocationService.java
     ├── RedisService.java
     └── UserService.java
+```
 
-🧠 Arquitectura del Sistema
+---
+
+## 🧠 Arquitectura del Sistema
+
+```bash
 +-------------------+          GSM/GPRS        +---------------------+
 |  Vehículo con GPS | -----------------------> |     Backend/API     |
 | (ESP32 + GPS +    |                         | (Cloud, VPS o local) |
@@ -93,11 +105,76 @@ src/main/java/com/arojas/gpstracker/
                                                    |  (Flutter/React|
                                                    |   Native/iOS)  |
                                                    +---------------+
+```
 
-🛠 Tecnologías
-Backend: Spring Boot 3.5.3 + JWT + WebSocket (STOMP)
-Base de datos: MySQL + Redis
-Hardware: ESP32, SIM800L, GPS Module
-Frontend móvil: Flutter
-Mensajería: STOMP over WebSocket
-Seguridad: Spring Security, BCrypt, Tokens de Refresh con Redis
+---
+
+## 🛠 Tecnologías
+
+```bash
+- **Backend:** Spring Boot 3.5.3 + JWT + WebSocket (STOMP)
+- **Base de datos:** MySQL + Redis
+- **Hardware:** ESP32, SIM800L, GPS Module
+- **Frontend móvil:** Flutter
+- **Mensajería:** STOMP over WebSocket
+- **Seguridad:** Spring Security, BCrypt, Tokens de Refresh con Redis
+```
+
+---
+
+## 📚 API Reference
+
+#### Obtener todos los ítems
+
+```http
+GET /api/items
+```
+
+| Parámeter | Tipo     | Descripción                     |
+| :-------- | :------- | :------------------------------ |
+| `api_key` | `string` | **Requerido**. Tu API key       |
+
+#### Obtener ítem por ID
+
+```http
+GET /api/items/${id}
+```
+
+| Parámeter | Tipo     | Descripción                     |
+| :-------- | :------- | :------------------------------ |
+| `id`      | `string` | **Requerido**. ID del ítem      |
+
+---
+
+## 👤 Authors
+
+- [@octokatherine](https://www.github.com/octokatherine)
+
+---
+
+## 🏷️ Badges
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+[![AGPL License](https://img.shields.io/badge/license-AGPL-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
+
+---
+
+## 📄 Documentación
+
+[Ver documentación](https://linktodocumentation)
+
+---
+
+## 📜 Licencia
+
+Este proyecto está licenciado bajo la [MIT License](https://choosealicense.com/licenses/mit/).
+
+---
+
+## 🏢 Usado por
+
+Este proyecto es usado por las siguientes compañías:
+
+- Company 1
+- Company 2

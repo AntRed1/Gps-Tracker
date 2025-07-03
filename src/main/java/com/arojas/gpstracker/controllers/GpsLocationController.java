@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.arojas.gpstracker.dto.ApiResponse;
+import com.arojas.gpstracker.dto.ApiResponseWrapper;
 import com.arojas.gpstracker.dto.GpsLocationDTO;
 import com.arojas.gpstracker.dto.GpsLocationMessage;
 import com.arojas.gpstracker.dto.GpsLocationRequest;
@@ -66,7 +66,7 @@ public class GpsLocationController {
   private final KafkaTemplate<String, GpsLocationMessage> kafkaTemplate;
 
   @PostMapping("/device/{deviceId}")
-  public ResponseEntity<ApiResponse<GpsLocationDTO>> saveLocation(
+  public ResponseEntity<ApiResponseWrapper<GpsLocationDTO>> saveLocation(
       @PathVariable Long deviceId,
       @Valid @RequestBody GpsLocationRequest request) {
     log.info("Sending location for device: {}, lat: {}, lng: {}",
@@ -80,19 +80,19 @@ public class GpsLocationController {
   }
 
   @GetMapping("/device/{deviceId}")
-  public ResponseEntity<ApiResponse<Page<GpsLocationDTO>>> getLocations(
+  public ResponseEntity<ApiResponseWrapper<Page<GpsLocationDTO>>> getLocations(
       @PathVariable Long deviceId,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     Page<GpsLocation> locations = gpsLocationService.getLocationsForDevice(deviceId, page, size);
     Page<GpsLocationDTO> dtos = locations.map(gpsLocationMapper::toDto);
-    return ResponseEntity.ok(ApiResponse.success(dtos));
+    return ResponseEntity.ok(ApiResponseWrapper.success(dtos));
   }
 
   @GetMapping("/device/{deviceId}/last")
-  public ResponseEntity<ApiResponse<GpsLocationDTO>> getLastLocation(@PathVariable Long deviceId) {
+  public ResponseEntity<ApiResponseWrapper<GpsLocationDTO>> getLastLocation(@PathVariable Long deviceId) {
     Optional<GpsLocation> location = gpsLocationService.getLastLocation(deviceId);
-    return location.map(loc -> ResponseEntity.ok(ApiResponse.success(gpsLocationMapper.toDto(loc))))
-        .orElse(ResponseEntity.ok(ApiResponse.error("No location found for device ID: " + deviceId)));
+    return location.map(loc -> ResponseEntity.ok(ApiResponseWrapper.success(gpsLocationMapper.toDto(loc))))
+        .orElse(ResponseEntity.ok(ApiResponseWrapper.error("No location found for device ID: " + deviceId)));
   }
 }
