@@ -156,7 +156,6 @@ public class DataInitializer {
     try {
       jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insert_location");
       String createProcedure = """
-          DELIMITER //
           CREATE PROCEDURE insert_location (
               IN p_device_id BIGINT,
               IN p_latitude DOUBLE,
@@ -184,8 +183,7 @@ public class DataInitializer {
 
               INSERT INTO gps_locations (device_id, latitude, longitude, timestamp)
               VALUES (p_device_id, p_latitude, p_longitude, p_timestamp);
-          END //
-          DELIMITER ;
+          END
           """;
       jdbcTemplate.execute(createProcedure);
       log.info("Creado el procedimiento almacenado: insert_location");
@@ -199,7 +197,6 @@ public class DataInitializer {
     try {
       jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insert_alert");
       String createProcedure = """
-          DELIMITER //
           CREATE PROCEDURE insert_alert (
               IN p_device_id BIGINT,
               IN p_message VARCHAR(255),
@@ -227,8 +224,7 @@ public class DataInitializer {
 
               INSERT INTO alerts (device_id, message, type, resolved, created_at)
               VALUES (p_device_id, p_message, p_type, FALSE, p_timestamp);
-          END //
-          DELIMITER ;
+          END
           """;
       jdbcTemplate.execute(createProcedure);
       log.info("Creado el procedimiento almacenado: insert_alert");
@@ -242,7 +238,6 @@ public class DataInitializer {
     try {
       jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insert_event");
       String createProcedure = """
-          DELIMITER //
           CREATE PROCEDURE insert_event (
               IN p_device_id BIGINT,
               IN p_event_type VARCHAR(50),
@@ -269,8 +264,7 @@ public class DataInitializer {
 
               INSERT INTO gps_events (device_id, event_type, timestamp)
               VALUES (p_device_id, p_event_type, p_timestamp);
-          END //
-          DELIMITER ;
+          END
           """;
       jdbcTemplate.execute(createProcedure);
       log.info("Creado el procedimiento almacenado: insert_event");
