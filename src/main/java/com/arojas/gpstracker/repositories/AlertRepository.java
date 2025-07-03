@@ -62,4 +62,14 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
   @Modifying
   @Query("UPDATE Alert a SET a.resolved = true, a.resolvedAt = :resolvedAt WHERE a.id = :alertId")
   void resolveAlert(@Param("alertId") Long alertId, @Param("resolvedAt") LocalDateTime resolvedAt);
+
+  @Query(value = "CALL insert_alert(:p_device_id, :p_message, :p_type, NOW())", nativeQuery = true)
+  void insertAlert(Long p_device_id, String p_message, String p_type);
+
+  List<Alert> findByDeviceIdAndResolvedFalse(Long deviceId);
+
+  @Modifying
+  @Query("UPDATE Alert a SET a.resolved = true WHERE a.id = :alertId")
+  void resolveAlert(Long alertId);
+
 }

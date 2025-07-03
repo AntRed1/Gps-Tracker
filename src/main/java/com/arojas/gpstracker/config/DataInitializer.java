@@ -30,12 +30,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.arojas.gpstracker.entities.Alert;
 import com.arojas.gpstracker.entities.Device;
+import com.arojas.gpstracker.entities.GpsEvent;
 import com.arojas.gpstracker.entities.User;
 import com.arojas.gpstracker.repositories.AlertRepository;
 import com.arojas.gpstracker.repositories.DeviceRepository;
@@ -65,7 +65,7 @@ public class DataInitializer {
   private final PasswordEncoder passwordEncoder;
 
   @Bean
-  CommandLineRunner initDatabase() {
+  public CommandLineRunner initDatabase() {
     return args -> {
       log.info("Inicializando la base de datos con tablas, procedimientos almacenados y datos de muestra");
       try {
@@ -116,7 +116,8 @@ public class DataInitializer {
               latitude DOUBLE NOT NULL,
               longitude DOUBLE NOT NULL,
               timestamp DATETIME NOT NULL,
-              FOREIGN KEY (device_id) REFERENCES devices(id)
+              FOREIGN KEY (device_id) REFERENCES devices(id),
+              INDEX idx_device_id_timestamp (device_id, timestamp)
           )
           """);
       log.info("Creada o verificada la tabla: gps_locations");
@@ -146,7 +147,26 @@ public class DataInitializer {
           )
           """);
       log.info("Creada o verificada la tabla: gps_events");
-    } catch (DataAccessException e) {
+
+      // Crear tabla http_logs
+      jdbcTemplate.execute("""
+          CREATE TABLE IF NOT EXISTS http_logs (
+              id BIGINT AUTO_INCREMENT PRIMARY KEY,
+              method VARCHAR(10) NOT NULL,
+              url VARCHAR(2048) NOT NULL,
+              query_params VARCHAR(2048),
+              request_body TEXT,
+              response_body TEXT,
+              status_code INT NOT NULL,
+              response_time_ms BIGINT NOT NULL,
+              client_ip VARCHAR(45),
+              user_agent VARCHAR(255),
+              user_email VARCHAR(255),
+              created_at DATETIME NOT NULL
+          )
+          """);
+      log.info("Creada o verificada la tabla: http_logs");
+    } catch (Exception e) {
       log.error("Error al crear las tablas de la base de datos: {}", e.getMessage(), e);
       throw e;
     }
@@ -154,13 +174,15 @@ public class DataInitializer {
 
   private void createLocationStoredProcedure() {
     try {
-      jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insert_location");
+      // Eliminar procedimiento si existe
+      jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insertLocation");
+
+      // Crear procedimiento almacenado
       String createProcedure = """
-          CREATE PROCEDURE insert_location (
+          CREATE PROCEDURE insertLocation (
               IN p_device_id BIGINT,
               IN p_latitude DOUBLE,
-              IN p_longitude DOUBLE,
-              IN p_timestamp DATETIME
+              IN p_longitude DOUBLE
           )
           BEGIN
               DECLARE device_exists INT;
@@ -178,30 +200,29 @@ public class DataInitializer {
                   SET MESSAGE_TEXT = 'La latitud y la longitud no pueden ser nulas';
               END IF;
 
-              -- Usar NOW() si p_timestamp es NULL
-              SET p_timestamp = COALESCE(p_timestamp, NOW());
-
               INSERT INTO gps_locations (device_id, latitude, longitude, timestamp)
-              VALUES (p_device_id, p_latitude, p_longitude, p_timestamp);
+              VALUES (p_device_id, p_latitude, p_longitude, NOW());
           END
           """;
       jdbcTemplate.execute(createProcedure);
-      log.info("Creado el procedimiento almacenado: insert_location");
-    } catch (DataAccessException e) {
-      log.error("Error al crear el procedimiento almacenado 'insert_location': {}", e.getMessage(), e);
-      throw new RuntimeException("No se pudo crear el procedimiento insert_location", e);
+      log.info("Creado el procedimiento almacenado: insertLocation");
+    } catch (Exception e) {
+      log.error("Error al crear el procedimiento almacenado 'insertLocation': {}", e.getMessage(), e);
+      throw new RuntimeException("No se pudo crear el procedimiento insertLocation", e);
     }
   }
 
   private void createAlertStoredProcedure() {
     try {
+      // Eliminar procedimiento si existe
       jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insert_alert");
+
+      // Crear procedimiento almacenado
       String createProcedure = """
           CREATE PROCEDURE insert_alert (
               IN p_device_id BIGINT,
               IN p_message VARCHAR(255),
-              IN p_type VARCHAR(50),
-              IN p_timestamp DATETIME
+              IN p_type VARCHAR(50)
           )
           BEGIN
               DECLARE device_exists INT;
@@ -219,16 +240,13 @@ public class DataInitializer {
                   SET MESSAGE_TEXT = 'El mensaje y el tipo no pueden ser nulos';
               END IF;
 
-              -- Usar NOW() si p_timestamp es NULL
-              SET p_timestamp = COALESCE(p_timestamp, NOW());
-
               INSERT INTO alerts (device_id, message, type, resolved, created_at)
-              VALUES (p_device_id, p_message, p_type, FALSE, p_timestamp);
+              VALUES (p_device_id, p_message, p_type, FALSE, NOW());
           END
           """;
       jdbcTemplate.execute(createProcedure);
       log.info("Creado el procedimiento almacenado: insert_alert");
-    } catch (DataAccessException e) {
+    } catch (Exception e) {
       log.error("Error al crear el procedimiento almacenado 'insert_alert': {}", e.getMessage(), e);
       throw new RuntimeException("No se pudo crear el procedimiento insert_alert", e);
     }
@@ -236,12 +254,14 @@ public class DataInitializer {
 
   private void createEventStoredProcedure() {
     try {
+      // Eliminar procedimiento si existe
       jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insert_event");
+
+      // Crear procedimiento almacenado
       String createProcedure = """
           CREATE PROCEDURE insert_event (
               IN p_device_id BIGINT,
-              IN p_event_type VARCHAR(50),
-              IN p_timestamp DATETIME
+              IN p_event_type VARCHAR(50)
           )
           BEGIN
               DECLARE device_exists INT;
@@ -259,16 +279,13 @@ public class DataInitializer {
                   SET MESSAGE_TEXT = 'El tipo de evento no puede ser nulo';
               END IF;
 
-              -- Usar NOW() si p_timestamp es NULL
-              SET p_timestamp = COALESCE(p_timestamp, NOW());
-
               INSERT INTO gps_events (device_id, event_type, timestamp)
-              VALUES (p_device_id, p_event_type, p_timestamp);
+              VALUES (p_device_id, p_event_type, NOW());
           END
           """;
       jdbcTemplate.execute(createProcedure);
       log.info("Creado el procedimiento almacenado: insert_event");
-    } catch (DataAccessException e) {
+    } catch (Exception e) {
       log.error("Error al crear el procedimiento almacenado 'insert_event': {}", e.getMessage(), e);
       throw new RuntimeException("No se pudo crear el procedimiento insert_event", e);
     }
@@ -302,22 +319,18 @@ public class DataInitializer {
         log.info("Creado dispositivo de muestra: id={}, alias={}", savedDevice.getId(), savedDevice.getAlias());
 
         // Insertar ubicaciones usando el procedimiento almacenado
-        jdbcTemplate.update("CALL insert_location(?, ?, ?, ?)", savedDevice.getId(), 40.7128, -74.0060,
-            LocalDateTime.now());
-        jdbcTemplate.update("CALL insert_location(?, ?, ?, ?)", savedDevice.getId(), 40.7130, -74.0050,
-            LocalDateTime.now());
+        gpsLocationRepository.insertLocation(savedDevice.getId(), 40.7128, -74.0060);
+        gpsLocationRepository.insertLocation(savedDevice.getId(), 40.7130, -74.0050);
         log.info("Creadas ubicaciones de muestra para el dispositivo: id={}", savedDevice.getId());
 
-        // Crear alerta
-        Alert alert = Alert.builder()
-            .message("Ubicación fuera de los límites")
-            .type(Alert.AlertType.LOCATION_OUT_OF_BOUNDS)
-            .resolved(false)
-            .createdAt(LocalDateTime.now())
-            .device(savedDevice)
-            .build();
-        alertRepository.save(alert);
+        // Insertar alerta usando el procedimiento almacenado
+        alertRepository.insertAlert(savedDevice.getId(), "Ubicación fuera de los límites",
+            Alert.AlertType.LOCATION_OUT_OF_BOUNDS.name());
         log.info("Creada alerta de muestra para el dispositivo: id={}", savedDevice.getId());
+
+        // Insertar evento usando el procedimiento almacenado
+        jdbcTemplate.update("CALL insert_event(?, ?)", savedDevice.getId(), GpsEvent.EventType.LOCATION_UPDATE.name());
+        log.info("Creado evento de muestra para el dispositivo: id={}", savedDevice.getId());
       } catch (Exception e) {
         log.error("Error al inicializar los datos de muestra: {}", e.getMessage(), e);
         throw new RuntimeException("No se pudieron inicializar los datos de muestra", e);

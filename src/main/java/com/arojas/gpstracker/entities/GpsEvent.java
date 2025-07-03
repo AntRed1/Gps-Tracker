@@ -69,7 +69,6 @@ public class GpsEvent {
   private Device device;
 
   public enum EventType {
-    ON,
-    OFF
+    ON, OFF, LOCATION_UPDATE
   }
 }

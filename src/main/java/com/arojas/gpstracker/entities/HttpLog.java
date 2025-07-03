@@ -62,6 +62,12 @@ public class HttpLog {
 	@Column(columnDefinition = "TEXT")
 	private String queryParams;
 
+	@Column(columnDefinition = "TEXT")
+	private String requestBody;
+
+	@Column(columnDefinition = "TEXT")
+	private String responseBody;
+
 	@Column(nullable = false)
 	private Integer statusCode;
 
@@ -73,6 +79,9 @@ public class HttpLog {
 
 	@Column(columnDefinition = "TEXT")
 	private String userAgent;
+
+	@Column(length = 255)
+	private String userEmail;
 
 	@Column(nullable = false)
 	@Builder.Default

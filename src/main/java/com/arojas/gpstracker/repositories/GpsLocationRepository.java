@@ -28,8 +28,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
@@ -47,49 +47,49 @@ import com.arojas.gpstracker.entities.GpsLocation;
 @Repository
 public interface GpsLocationRepository extends JpaRepository<GpsLocation, Long> {
 
-  /**
-   * Inserts a new location using a stored procedure.
-   *
-   * @param deviceId  ID of the device
-   * @param latitude  Latitude
-   * @param longitude Longitude
-   */
-  @Procedure(name = "insert_location")
-  void insertLocation(
-      @Param("p_device_id") Long deviceId,
-      @Param("p_latitude") double latitude,
-      @Param("p_longitude") double longitude);
+    /**
+     * Inserts a new location using a stored procedure.
+     *
+     * @param deviceId  ID of the device
+     * @param latitude  Latitude
+     * @param longitude Longitude
+     */
+    @Procedure(name = "insert_location")
+    void insertLocation(
+            @Param("p_device_id") Long deviceId,
+            @Param("p_latitude") double latitude,
+            @Param("p_longitude") double longitude);
 
-  /**
-   * Retrieves the latest location for a device, ordered by timestamp descending.
-   *
-   * @param deviceId ID of the device
-   * @return Optional containing the latest location, or empty if none exists
-   */
-  Optional<GpsLocation> findTopByDeviceIdOrderByTimestampDesc(Long deviceId);
+    /**
+     * Retrieves the latest location for a device, ordered by timestamp descending.
+     *
+     * @param deviceId ID of the device
+     * @return Optional containing the latest location, or empty if none exists
+     */
+    Optional<GpsLocation> findTopByDeviceIdOrderByTimestampDesc(Long deviceId);
 
-  /**
-   * Retrieves paginated locations for a device, ordered by timestamp descending.
-   *
-   * @param deviceId ID of the device
-   * @param pageable Pagination information
-   * @return Paginated list of locations
-   */
-  @Query("SELECT l FROM GpsLocation l WHERE l.device.id = :deviceId ORDER BY l.timestamp DESC")
-  Page<GpsLocation> findAllByDeviceIdOrderByTimestampDesc(@Param("deviceId") Long deviceId, Pageable pageable);
+    /**
+     * Retrieves paginated locations for a device, ordered by timestamp descending.
+     *
+     * @param deviceId ID of the device
+     * @param pageable Pagination information
+     * @return Paginated list of locations
+     */
+    @Query("SELECT l FROM GpsLocation l WHERE l.device.id = :deviceId ORDER BY l.timestamp DESC")
+    Page<GpsLocation> findAllByDeviceIdOrderByTimestampDesc(@Param("deviceId") Long deviceId, Pageable pageable);
 
-  /**
-   * Retrieves locations for a device within a time range, ordered by timestamp
-   * descending.
-   *
-   * @param deviceId ID of the device
-   * @param start    Start of the time range
-   * @param end      End of the time range
-   * @return List of locations within the specified time range
-   */
-  @Query("SELECT l FROM GpsLocation l WHERE l.device.id = :deviceId AND l.timestamp BETWEEN :start AND :end ORDER BY l.timestamp DESC")
-  List<GpsLocation> findByDeviceIdAndTimestampBetweenOrderByTimestampDesc(
-      @Param("deviceId") Long deviceId,
-      @Param("start") LocalDateTime start,
-      @Param("end") LocalDateTime end);
+    /**
+     * Retrieves locations for a device within a time range, ordered by timestamp
+     * descending.
+     *
+     * @param deviceId ID of the device
+     * @param start    Start of the time range
+     * @param end      End of the time range
+     * @return List of locations within the specified time range
+     */
+    @Query("SELECT l FROM GpsLocation l WHERE l.device.id = :deviceId AND l.timestamp BETWEEN :start AND :end ORDER BY l.timestamp DESC")
+    List<GpsLocation> findByDeviceIdAndTimestampBetweenOrderByTimestampDesc(
+            @Param("deviceId") Long deviceId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end);
 }

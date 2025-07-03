@@ -24,7 +24,10 @@
 
 package com.arojas.gpstracker.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.arojas.gpstracker.entities.HttpLog;
@@ -35,4 +38,10 @@ import com.arojas.gpstracker.entities.HttpLog;
  */
 @Repository
 public interface HttpLogRepository extends JpaRepository<HttpLog, Long> {
+
+	@Query("SELECT h FROM HttpLog h WHERE h.userEmail = :userEmail ORDER BY h.createdAt DESC")
+	List<HttpLog> findByUserEmail(String userEmail);
+
+	@Query("SELECT h FROM HttpLog h WHERE h.url LIKE %:urlPattern% ORDER BY h.createdAt DESC")
+	List<HttpLog> findByUrlPattern(String urlPattern);
 }

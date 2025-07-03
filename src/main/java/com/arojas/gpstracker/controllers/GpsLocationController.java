@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author neta1
  *         * Controller for managing GPS locations.
- * 
+ *
  */
 @RestController
 @RequestMapping("/gps-locations")
